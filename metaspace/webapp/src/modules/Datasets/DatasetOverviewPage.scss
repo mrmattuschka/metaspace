@@ -1,16 +1,17 @@
 
 .dop {
-  @apply grid grid-cols-1 h-full items-start;
-  grid-template-areas:
-    "dop--header"
-    "dop--gallery"
-    "dop--details";
 
-  @screen lg {
-    @apply grid-cols-2;
+  @media (max-width: calc(theme('screens.lg') - 1px)) {
+    /* For mobile */
+    @apply grid grid-cols-1 h-full items-start;
     grid-template-areas:
-      "dop--header  dop--gallery"
-      "dop--details dop--gallery";
+      "dop--header"
+      "dop--gallery"
+      "dop--details";
+
+    .dop--left, .dop--right {
+      display: contents;
+    }
   }
 }
 .dop--header {

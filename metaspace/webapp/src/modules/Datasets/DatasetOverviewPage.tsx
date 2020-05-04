@@ -16,27 +16,31 @@ export default createComponent<{}>({
 
     return () => dataset.value != null
       ? (
-        <div class="dop--grid">
-          <div class="dop--header">
-            <div class="flex">
-              <h1 class="flex-grow">{dataset.value != null ? dataset.value.name : null}</h1>
-              <Dropdown class="dop--cog-menu">
-                <i class="el-icon-s-tools dop--cog-menu--icon" />
-                <DropdownMenu slot="dropdown">
-                  <DropdownItem command="edit">Edit</DropdownItem>
-                  <DropdownItem command="editOpt">Upload optical image</DropdownItem>
-                  <DropdownItem command="download">Download</DropdownItem>
-                  <DropdownItem command="reprocess">Reprocess</DropdownItem>
-                  <DropdownItem command="delete">Delete</DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
+        <div class="dop">
+          <div class="dop--left">
+            <div class="dop--header">
+              <div class="flex">
+                <h1 class="flex-grow">{dataset.value != null ? dataset.value.name : null}</h1>
+                <Dropdown class="dop--cog-menu">
+                  <i class="el-icon-s-tools dop--cog-menu--icon" />
+                  <DropdownMenu slot="dropdown">
+                    <DropdownItem command="edit">Edit</DropdownItem>
+                    <DropdownItem command="editOpt">Upload optical image</DropdownItem>
+                    <DropdownItem command="download">Download</DropdownItem>
+                    <DropdownItem command="reprocess">Reprocess</DropdownItem>
+                    <DropdownItem command="delete">Delete</DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
+            </div>
+            <div class="dop--details">
+              Details
             </div>
           </div>
-          <div class="dop--details">
-            Details
-          </div>
-          <div class="dop--gallery">
-            Gallery
+          <div class="dop--right">
+            <div class="dop--gallery">
+              Gallery
+            </div>
           </div>
         </div>
       )
