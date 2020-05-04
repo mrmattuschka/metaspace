@@ -80,7 +80,7 @@ export const datasetDetailItemFragment =
     status
     statusUpdateDT
     metadataType
-    fdrCounts(inpFdrLvls: $inpFdrLvls, checkLvl: $checkLvl) {
+    fdrCounts(inpFdrLvls: [10], checkLvl: 10) {
       dbName
       levels
       counts
@@ -92,7 +92,7 @@ export const datasetDetailItemFragment =
   }`
 
 export const datasetDetailItemsQuery =
-  gql`query GetDatasets($dFilter: DatasetFilter, $query: String, $inpFdrLvls: [Int!]!, $checkLvl: Int!) {
+  gql`query GetDatasets($dFilter: DatasetFilter, $query: String) {
     allDatasets(offset: 0, limit: 100, filter: $dFilter, simpleQuery: $query) {
       ...DatasetDetailItem
     }
@@ -114,6 +114,18 @@ export const countDatasetsQuery =
   gql`query CountDatasets($dFilter: DatasetFilter, $query: String) {
     countDatasets(filter: $dFilter, simpleQuery: $query)
   }`
+
+export interface GetDatasetByIdQuery {
+  dataset: DatasetDetailItem
+}
+export const getDatasetByIdQuery =
+  gql`query getDatasetByIdQuery($id: String!) {
+    dataset(id: $id) {
+      ...DatasetDetailItem
+    }
+  }
+  ${datasetDetailItemFragment}
+`
 
 export interface DatasetListItem {
   id: string;
@@ -216,10 +228,7 @@ export interface DatasetVisibilityResult {
   projects: { id: string, name: string }[] | null;
 }
 
-export const datasetStatusUpdatedQuery = gql`subscription datasetStatusUpdated(
-  $inpFdrLvls: [Int!] = [10],
-  $checkLvl: Int = 10
-) {
+export const datasetStatusUpdatedQuery = gql`subscription datasetStatusUpdated {
   datasetStatusUpdated {
     dataset {
       ...DatasetDetailItem

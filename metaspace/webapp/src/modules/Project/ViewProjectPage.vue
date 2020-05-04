@@ -255,9 +255,7 @@ import NewFeatureBadge, { hideFeatureBadge } from '../../components/NewFeatureBa
       data: {
         query: gql`query ProjectProfileDatasets(
           $projectId: ID!,
-          $maxVisibleDatasets: Int!,
-          $inpFdrLvls: [Int!] = [10],
-          $checkLvl: Int = 10
+          $maxVisibleDatasets: Int!
         ) {
           allDatasets(offset: 0, limit: $maxVisibleDatasets, filter: { project: $projectId }) {
             ...DatasetDetailItem

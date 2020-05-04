@@ -98,14 +98,12 @@ export default {
     padding: 0;
   }
 
-  #app {
-    @apply text-body;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    margin: 0;
-    min-height: 100%;
-    position: relative;
-  }
+ #app {
+   @apply text-body flex flex-col relative min-h-full h-full m-0;
+   justify-items: flex-start;
+   -webkit-font-smoothing: antialiased;
+   -moz-osx-font-smoothing: grayscale;
+ }
 
   h1, h2 {
     font-weight: 500;

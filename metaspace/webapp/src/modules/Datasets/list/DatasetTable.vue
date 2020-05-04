@@ -128,8 +128,6 @@ export default Vue.extend({
       return {
         dFilter: this.$store.getters.gqlDatasetFilter,
         query: this.$store.getters.ftsQuery,
-        inpFdrLvls: [10],
-        checkLvl: 10,
       }
     },
     nonEmpty() {

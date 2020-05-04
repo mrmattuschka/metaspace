@@ -142,7 +142,7 @@ export const colocalizationAlgosQuery = gql`query colocalizationAlgosQuery {
 
 export const metadataExportQuery = gql`
   query MetadataExport($dFilter: DatasetFilter, $offset: Int, $limit: Int,
-                       $query: String, $inpFdrLvls: [Int!]!, $checkLvl: Int!) {
+                       $query: String) {
     datasets: allDatasets(filter: $dFilter, simpleQuery: $query,
                           offset: $offset, limit: $limit) {
       id
@@ -173,7 +173,7 @@ export const metadataExportQuery = gql`
       }
       polarity
       uploadDateTime
-      fdrCounts(inpFdrLvls: $inpFdrLvls, checkLvl: $checkLvl) {
+      fdrCounts(inpFdrLvls: [10], checkLvl: 10) {
         dbName
         levels
         counts
