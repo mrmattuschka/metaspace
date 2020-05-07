@@ -10,6 +10,7 @@ export interface DatasetDetailItem {
   submitter: {
     id: string | null;
     name: string;
+    email: string | null;
   };
   principalInvestigator: {
     name: string;

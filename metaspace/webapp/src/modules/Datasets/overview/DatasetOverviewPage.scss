@@ -1,0 +1,41 @@
+.dop {
+  @apply flex h-full flex-col;
+  @screen lg {
+    @apply flex-row;
+  }
+}
+.dop--left, .dop--right {
+  display: contents; // On smaller screens, ignore these elements to collapse to single-column
+  @screen lg {
+    @apply flex flex-col flex-none w-1/2;
+  }
+}
+
+
+.dop--header {
+  order: 1;
+}
+.dop--details {
+  order: 3;
+}
+.dop--gallery {
+  @apply bg-gray-100;
+  order: 2; // Show between header & details on smaller screens
+  @screen lg {
+    @apply h-full;
+  }
+}
+
+.dop--cog-menu {
+  @apply flex-none inline-block p-2 m-2 self-center cursor-pointer rounded-full;
+  .dop--cog-menu--icon {
+    @apply text-3xl;
+  }
+
+  &:hover {
+    @apply bg-gray-200;
+    .dop--cog-menu--icon {
+      @apply text-gray-900;
+    }
+  }
+}
