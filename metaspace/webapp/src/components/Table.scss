@@ -1,5 +1,5 @@
 .sm-table {
-  border-spacing: 0;
+  border-collapse: collapse;
   font-size: 14px;
   line-height: 24px;
   width: 100%;
@@ -45,9 +45,10 @@
   min-width: 16px;
 }
 
-.sm-table-empty-row {
-  text-align: center;
+.sm-table-empty-row td, .sm-table-header-row th {
+  @apply text-center;
 }
+
 
 .sm-table-button-group {
   align-items: center;
@@ -75,4 +76,19 @@
 .sm-table-user-details tr > :nth-child(4) {
   text-align: right;
   width: 25%;
+}
+
+/* Annotation Counts table */
+.sm-table-annotation-counts--with-total {
+  tr:nth-last-child(2) {
+    td, th {
+      @apply border-gray-400;
+    }
+  }
+  tr:nth-last-child(1) {
+    td, th {
+      @apply border-gray-400 border-double;
+      border-bottom-width: 3px;
+    }
+  }
 }

@@ -100,7 +100,6 @@ export default {
 
  #app {
    @apply text-body flex flex-col relative min-h-full h-full m-0;
-   justify-items: flex-start;
    -webkit-font-smoothing: antialiased;
    -moz-osx-font-smoothing: grayscale;
  }

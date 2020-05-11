@@ -60,13 +60,17 @@ module.exports = {
       spacing: {
         auto: 'auto',
       },
-      maxWidth: {
+      minWidth: theme => theme('width'),
+      maxWidth: theme => ({
+        ...theme('width'),
         'measure-1': '44ch',
         'measure-2': '52ch',
         'measure-3': '60ch',
         'measure-4': '68ch',
         'measure-5': '76ch',
-      },
+      }),
+      minHeight: theme => theme('height'),
+      maxHeight: theme => theme('height'),
       zIndex: {
         '-10': '-10', // Use .-z-10 not .z--10
         '-20': '-20',

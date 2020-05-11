@@ -1,13 +1,20 @@
 .dop {
-  @apply flex h-full flex-col;
+  @apply flex h-full flex-col pl-4 pr-4;
+
   @screen lg {
-    @apply flex-row;
+    @apply flex-row pr-0;
   }
 }
 .dop--left, .dop--right {
   display: contents; // On smaller screens, ignore these elements to collapse to single-column
   @screen lg {
-    @apply flex flex-col flex-none w-1/2;
+    @apply flex flex-col flex-grow w-1/2;
+  }
+}
+.dop--left {
+  @screen lg {
+    @apply pr-4 pb-4;
+    max-width: 800px;
   }
 }
 
@@ -27,7 +34,7 @@
 }
 
 .dop--cog-menu {
-  @apply flex-none inline-block p-2 m-2 self-center cursor-pointer rounded-full;
+  @apply flex-none inline-block p-2 m-2 cursor-pointer rounded-full;
   .dop--cog-menu--icon {
     @apply text-3xl;
   }
@@ -38,4 +45,10 @@
       @apply text-gray-900;
     }
   }
+}
+
+.dop--total-row, .dop--total-row > td, .dop--total-row > th {
+  border-top-width: 1px;
+  border-bottom-width: 3px;
+  border-style: solid none double;
 }

@@ -1,4 +1,4 @@
-import './Table.css'
+import '../../components/Table.scss'
 
 import Vue from 'vue'
 import { Button, Message } from 'element-ui'
