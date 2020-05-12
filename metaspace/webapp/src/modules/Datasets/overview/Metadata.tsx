@@ -60,7 +60,6 @@ const Metadata = createComponent<Props>({
     })
     const sections = computed(() => {
       const schemaSections = schema.value.properties
-      console.log(schemaSections, get(schemaSections, ['Sample_Information', 'properties']))
       const s = Object.entries(props.metadata)
         .filter(([section]) => section !== 'Data_Type')
         .map(([section, sectionContent]) => [

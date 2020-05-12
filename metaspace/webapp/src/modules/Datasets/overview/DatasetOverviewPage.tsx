@@ -1,14 +1,16 @@
-import { computed, createComponent } from '@vue/composition-api'
+import { computed, createComponent, reactive, ref } from '@vue/composition-api'
 import { useQuery } from '@vue/apollo-composable'
 import safeJsonParse from '../../../lib/safeJsonParse'
 import { GetDatasetByIdQuery, getDatasetByIdQuery } from '../../../api/dataset'
 import { Menu } from './Menu'
 import Metadata from './Metadata'
-import { range, zip } from 'lodash-es'
+import { get, intersection, keyBy, range, zip } from 'lodash-es'
 import { encodeParams } from '../../Filters'
 import '../../../components/Table.scss'
 import { Button } from 'element-ui'
 import VisibilityBadge from '../common/VisibilityBadge'
+import { DIAGNOSTICS } from '../diagnostics/diagnostics'
+import DropdownMenu from '../../../components/DropdownMenu'
 
 const annotationsLink = (datasetId: string, database?: string, fdrLevel?: number) => ({
   name: 'dataset-annotations',
@@ -92,6 +94,41 @@ export default createComponent<{}>({
       loading: datasetLoading,
     } = useQuery<GetDatasetByIdQuery>(getDatasetByIdQuery, { id: datasetId })
     const dataset = computed(() => datasetResult.value != null ? datasetResult.value.dataset : null)
+    const diagnosticData = reactive([
+      {
+        id: 'ionPreview',
+        data: JSON.stringify({minIntensity: [0,0,1], maxIntensity: [3,4,5]}),
+        images: [],
+      },
+      {
+        id: 'long',
+        data: JSON.stringify({minIntensity: [0,0,1], maxIntensity: [3,4,5]}),
+        images: [],
+      },
+    ])
+    const parsedDiagnostiData = diagnosticData.map(({data, ...rest}) => ({...rest, data: JSON.parse(data)}));
+    const diagnosticDataLookup = reactive(keyBy(parsedDiagnostiData, 'id'))
+    const selectedDiagId = ref<string>('ionPreview')
+    const currentDiag = computed(() => DIAGNOSTICS[selectedDiagId.value] || null)
+    const currentDiagData = computed(() => diagnosticDataLookup[selectedDiagId.value] || null)
+    const availableDiagnosticIds = computed(() => intersection(Object.keys(DIAGNOSTICS), Object.keys(diagnosticDataLookup)))
+    const availableDiagnostics = computed(() => availableDiagnosticIds.value.map(id => DIAGNOSTICS[id]))
+
+    // const oldDropdown = () => (
+    //   <Dropdown class="flex-grow text-center w-full">
+    //     <div data-foo>
+    //       {currentDiag.value != null ? currentDiag.value.name : selectedDiagId.value}
+    //       <i class="el-icon-arrow-down px-3 foo" />
+    //     </div>
+    //
+    //     <DropdownMenu>
+    //       {availableDiagnostics.value.map(({id, name}) => (
+    //         <DropdownItem command={id}>{name}</DropdownItem>
+    //       ))}
+    //
+    //     </DropdownMenu>
+    //   </Dropdown>
+    // )
 
     return () => {
       if (datasetLoading.value && dataset.value == null) {
@@ -133,6 +170,21 @@ export default createComponent<{}>({
           <div class="dop--right">
             <div class="dop--gallery">
               Gallery
+              <div class="flex items-center justify-between">
+                <i class="el-icon-s-grid invisible flex-none">{/*For centering the dropdown*/}</i>
+                <div class="flex flex-grow items-center max-w-64">
+                  <i class="el-icon-arrow-left" />
+                  <DropdownMenu
+                    text={currentDiag.value != null ? currentDiag.value.name : selectedDiagId.value}
+                    buttonType="text"
+                    align="center"
+                    items={availableDiagnostics.value.map(({id, name}) => ({id, text: name, onClick: () => { selectedDiagId.value = id }}))}
+                    chevron
+                  />
+                  <i class="el-icon-arrow-right" />
+                </div>
+                <i class="el-icon-s-grid" />
+              </div>
             </div>
           </div>
         </div>
