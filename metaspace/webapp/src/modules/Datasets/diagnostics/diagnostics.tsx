@@ -1,35 +1,49 @@
-import Vue, { Component } from 'vue'
+import Vue, { Component, VueConstructor } from 'vue'
 import { keyBy } from 'lodash-es'
 import { createComponent } from '@vue/composition-api'
 import ImageLoader from '../../../components/ImageLoader.vue'
+import { ComponentOptions } from 'vue/types/options'
+
+interface DiagnosticComponentProps {
+  data: any;
+  imageIds: string[];
+}
+type DiagnosticComponent = ComponentOptions<Vue, any, any, any, any, DiagnosticComponentProps> & {new(): any}
+const diagnosticComponentProps = {
+  data: { type: Object as () => any, required: true },
+  imageIds: { type: Array as () => string[], required: true },
+}
 
 interface DiagnosticInfo {
   id: string;
   name: string;
   helpText?: string;
-  component: Component;
-  previewComponent?: Component;
+  component: DiagnosticComponent;
+  previewComponent?: DiagnosticComponent;
 }
 
 export const DIAGNOSTICS_LIST: DiagnosticInfo[] = [
   {
     id: 'ionPreview',
     name: 'Preview',
-    component: createComponent({
-      setup({data, ionImages}) {
-        return () => <ImageLoader src={ionImages[0]} />
+    component: createComponent<DiagnosticComponentProps>({
+      name: 'ionPreview',
+      props: diagnosticComponentProps,
+      setup({ imageIds }) {
+        return () => <ImageLoader src={imageIds[0]} />
       },
     }),
   },
   {
     id: 'long',
     name: 'LongTextLongTextLongTextLongText LongTextLongTextLongTextLongText',
-    component: createComponent({
-      setup({data, ionImages}) {
-        return () => <ImageLoader src={ionImages[0]} />
+    component: createComponent<DiagnosticComponentProps>({
+      props: diagnosticComponentProps,
+      setup({ imageIds }) {
+        return () => <ImageLoader src={imageIds[0]} />
       },
     }),
   },
-];
+]
 
 export const DIAGNOSTICS: Record<string, DiagnosticInfo> = keyBy(DIAGNOSTICS_LIST, 'id')

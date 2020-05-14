@@ -27,18 +27,18 @@ interface Props {
  * and synchronizes the width of the menu with the width of the trigger element.
  */
 export default createComponent<Props>({
-
+  name: 'DropdownMenu',
   directives: { Clickoutside },
   props: {
     icon: String,
     text: String,
     buttonType: String,
-    chevron: {type: Boolean, default: false},
-    align: {type: String, default: 'right'},
+    chevron: { type: Boolean, default: false },
+    align: { type: String, default: 'right' },
     items: Array,
   },
   setup(props, ctx) {
-    const isOpen = ref(false);
+    const isOpen = ref(false)
     const toggle = () => { isOpen.value = !isOpen.value }
     const close = () => { isOpen.value = false }
 
@@ -47,36 +47,31 @@ export default createComponent<Props>({
         + ' hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900'
       return props.items.map(item => {
         const onEvent = (e: MouseEvent | KeyboardEvent) => {
-          if (item.onActivate != null
-            && (e.type === 'click' || e.type === 'keyup' && (e as KeyboardEvent).key === 'Enter')) {
-            item.onActivate(e, item.id)
+          if (e.type === 'click' || e.type === 'keyup' && (e as KeyboardEvent).key === 'Enter') {
+            if (item.onActivate != null) {
+              item.onActivate(e, item.id)
+            }
+            ctx.emit('activateItem', e, item.id)
             e.preventDefault()
             close()
           }
         }
-        const commonProps = {
-          key: item.id,
-          class: [itemClass, item.className, {'': item.selected}],
-          tabindex: 0,
-          onClick: onEvent,
-          onKeyup: onEvent,
-        }
+        const Type = item.link ? 'router-link' : 'span'
+        const extraProps = item.link ? {
+          to: item.link,
+        } : {}
 
-        if (item.link) {
-          return (
-            <router-link
-              {...commonProps}
-              to={item.link}>
-              {item.text}
-            </router-link>
-          )
-        } else {
-          return (
-            <span {...commonProps}>
-              {item.text}
-            </span>
-          )
-        }
+        return (
+          <Type
+            {...extraProps}
+            key={item.id}
+            class={[itemClass, item.className, { '': item.selected }]}
+            onClick={onEvent}
+            onKeyup={onEvent}
+            tabIndex={0}>
+            {item.text}
+          </Type>
+        )
       })
     })
 
@@ -86,11 +81,12 @@ export default createComponent<Props>({
         center: 'origin-top transform left-1/2 -translate-x-1/2', // transform has no IE11 support. positioning will be weird.
         right: 'origin-top-right right-0',
       }[props.align!]
-      const buttonClass = props.buttonType === 'text'
-      ? 'px-2 focus:border-blue-300 focus:shadow-outline-blue hover:border-blue-300 hover:shadow-outline-blue'
-        : ''
+      const buttonClass = 'truncate max-w-full' + (props.buttonType === 'text'
+        ? ' px-2 truncate focus:border-blue-300 focus:shadow-outline-blue'
+          + ' hover:border-blue-300 hover:shadow-outline-blue'
+        : '')
       return (
-        <div class="relative inline-block" v-clickoutside={close}>
+        <div class="relative inline-block max-w-full" v-clickoutside={close}>
           {ctx.slots.default != null
             ? ctx.slots.default()
             : <Button
@@ -100,7 +96,7 @@ export default createComponent<Props>({
               onClick={toggle}>
               {props.text}
               {props.chevron && <i class="el-icon-arrow-down pl-2" />}
-          </Button>}
+            </Button>}
           <FadeTransition>
             {isOpen.value
             && <div class={['absolute rounded-md shadow-lg min-w-full mt-2', originClass]}>
@@ -112,5 +108,5 @@ export default createComponent<Props>({
         </div>
       )
     }
-  }
+  },
 })

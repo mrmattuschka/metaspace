@@ -85,7 +85,60 @@ const AnnotationCounts = createComponent({
   },
 })
 
+interface RawDiagnosticData {
+  id: string;
+  data: string;
+  imageIds: string[];
+}
+
+const Gallery = createComponent({
+  props: {
+    diagnosticData: { type: Array as () => RawDiagnosticData[], required: true },
+  },
+  setup(props) {
+    const diagnosticDataLookup = computed(() => {
+      const parsed = props.diagnosticData.map(({ data, ...rest }) => ({ ...rest, data: JSON.parse(data) }))
+      return keyBy(parsed, 'id')
+    })
+    const selectedDiagId = ref<string>('ionPreview')
+
+    return () => {
+      const currentDiag = DIAGNOSTICS[selectedDiagId.value] || null
+      const { data = null, imageIds = null } = diagnosticDataLookup.value[selectedDiagId.value] || { }
+      const availableDiagnosticIds = intersection(Object.keys(DIAGNOSTICS), Object.keys(diagnosticDataLookup))
+      const DiagComponent = currentDiag?.component!
+
+      return (
+        <div>
+          <div class="flex items-center justify-between">
+            <Button icon="el-icon-s-grid flex-none invisible" type="text" />
+            <i class="el-icon-s-grid invisible flex-none">{/* For centering the dropdown */}</i>
+            <div class="flex flex-grow items-center max-w-64">
+              <i class="el-icon-arrow-left" />
+              <DropdownMenu
+                text={currentDiag?.name ?? selectedDiagId.value}
+                buttonType="text"
+                align="center"
+                items={availableDiagnosticIds.map(id => ({ id, text: DIAGNOSTICS[id].name }))}
+                onActivateItem={(e: any, id: string) => { selectedDiagId.value = id }}
+                chevron
+              />
+              <i class="el-icon-arrow-right" />
+            </div>
+            <Button icon="el-icon-s-grid flex-none" type="text" />
+          </div>
+          <div>
+            <DiagComponent data={data} imageIds={imageIds} />
+          </div>
+        </div>
+      )
+    }
+  },
+})
+
 export default createComponent<{}>({
+  name: 'DatasetOverviewPage',
+  props: {},
   setup(props, ctx) {
     const { $router, $route } = ctx.root
     const datasetId = computed(() => $route.params.datasetId)
@@ -97,22 +150,15 @@ export default createComponent<{}>({
     const diagnosticData = reactive([
       {
         id: 'ionPreview',
-        data: JSON.stringify({minIntensity: [0,0,1], maxIntensity: [3,4,5]}),
-        images: [],
+        data: JSON.stringify({ minIntensity: [0, 0, 1], maxIntensity: [3, 4, 5] }),
+        imageIds: ['/fs/iso_images/db661295d6900638d9881133b882da1c'],
       },
       {
         id: 'long',
-        data: JSON.stringify({minIntensity: [0,0,1], maxIntensity: [3,4,5]}),
-        images: [],
+        data: JSON.stringify({ minIntensity: [0, 0, 1], maxIntensity: [3, 4, 5] }),
+        imageIds: ['/fs/iso_images/db661295d6900638d9881133b882da1c'],
       },
     ])
-    const parsedDiagnostiData = diagnosticData.map(({data, ...rest}) => ({...rest, data: JSON.parse(data)}));
-    const diagnosticDataLookup = reactive(keyBy(parsedDiagnostiData, 'id'))
-    const selectedDiagId = ref<string>('ionPreview')
-    const currentDiag = computed(() => DIAGNOSTICS[selectedDiagId.value] || null)
-    const currentDiagData = computed(() => diagnosticDataLookup[selectedDiagId.value] || null)
-    const availableDiagnosticIds = computed(() => intersection(Object.keys(DIAGNOSTICS), Object.keys(diagnosticDataLookup)))
-    const availableDiagnostics = computed(() => availableDiagnosticIds.value.map(id => DIAGNOSTICS[id]))
 
     // const oldDropdown = () => (
     //   <Dropdown class="flex-grow text-center w-full">
@@ -169,22 +215,7 @@ export default createComponent<{}>({
           </div>
           <div class="dop--right">
             <div class="dop--gallery">
-              Gallery
-              <div class="flex items-center justify-between">
-                <i class="el-icon-s-grid invisible flex-none">{/*For centering the dropdown*/}</i>
-                <div class="flex flex-grow items-center max-w-64">
-                  <i class="el-icon-arrow-left" />
-                  <DropdownMenu
-                    text={currentDiag.value != null ? currentDiag.value.name : selectedDiagId.value}
-                    buttonType="text"
-                    align="center"
-                    items={availableDiagnostics.value.map(({id, name}) => ({id, text: name, onClick: () => { selectedDiagId.value = id }}))}
-                    chevron
-                  />
-                  <i class="el-icon-arrow-right" />
-                </div>
-                <i class="el-icon-s-grid" />
-              </div>
+              <Gallery diagnosticData={diagnosticData} />
             </div>
           </div>
         </div>
