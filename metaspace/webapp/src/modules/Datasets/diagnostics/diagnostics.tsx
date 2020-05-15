@@ -30,7 +30,13 @@ export const DIAGNOSTICS_LIST: DiagnosticInfo[] = [
       name: 'ionPreview',
       props: diagnosticComponentProps,
       setup({ imageIds }) {
-        return () => <ImageLoader src={imageIds[0]} />
+        return () => <ImageLoader
+          src={imageIds[0]}
+          imagePosition={{ zoom: 1, xOffset: 0, yOffset: 0 }}
+          minIntensity={0}
+          maxIntensity={1}
+          pixelAspectRatio={1}
+        />
       },
     }),
   },
@@ -40,7 +46,10 @@ export const DIAGNOSTICS_LIST: DiagnosticInfo[] = [
     component: createComponent<DiagnosticComponentProps>({
       props: diagnosticComponentProps,
       setup({ imageIds }) {
-        return () => <ImageLoader src={imageIds[0]} />
+        return () => <ImageLoader
+          src={imageIds[0]}
+          imagePosition={{ zoom: 1, xOffset: 0, yOffset: 0 }}
+        />
       },
     }),
   },

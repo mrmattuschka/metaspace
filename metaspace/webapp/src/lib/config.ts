@@ -39,6 +39,7 @@ interface Features {
   advanced_ds_config: boolean;
   isomers: boolean;
   isobars: boolean;
+  ds_overview: boolean;
 }
 
 interface ClientConfig {
@@ -79,6 +80,7 @@ const defaultConfig: ClientConfig = {
     advanced_ds_config: false,
     isomers: true,
     isobars: true,
+    ds_overview: false,
   },
 }
 
