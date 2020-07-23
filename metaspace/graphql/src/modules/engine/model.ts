@@ -54,6 +54,9 @@ export class EngineDataset {
 
   @OneToMany(type => Job, job => job.dataset)
   jobs: Job[];
+
+  @Column({ type: 'text', nullable: true })
+  s3ResultsPrefix: string | null;
 }
 
 @Entity({schema: 'public'})

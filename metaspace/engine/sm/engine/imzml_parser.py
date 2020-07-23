@@ -5,12 +5,17 @@ from sm.engine.errors import ImzMLError
 
 from sm.engine.util import find_file_by_ext
 
+TOTAL_ION_CURRENT_ACCESSION = 'MS:1000285'
+SPECTRA_METADATA = {TOTAL_ION_CURRENT_ACCESSION}
+
 
 class ImzMLParserWrapper:
     def __init__(self, path):
         self.filename = find_file_by_ext(path, 'imzml')
         try:
-            self._imzml_parser = ImzMLParser(self.filename, parse_lib='ElementTree')
+            self._imzml_parser = ImzMLParser(
+                self.filename, parse_lib='ElementTree', include_spectra_metadata=SPECTRA_METADATA
+            )
         except Exception as e:
             raise ImzMLError(format_exc()) from e
         self.coordinates = [coord[:2] for coord in self._imzml_parser.coordinates]
