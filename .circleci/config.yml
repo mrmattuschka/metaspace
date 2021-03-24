@@ -390,6 +390,7 @@ workflows:
               only:
                 - master
                 # Add additional branches to run sci-test against here. Clean up old branches if you notice any.
+                - feat/fix-sci-test
                 - feat/lithops-ds-sort-in-ram
 
 

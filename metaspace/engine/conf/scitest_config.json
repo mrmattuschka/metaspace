@@ -157,5 +157,8 @@
       "-": ["-H", "+Cl" ]
     },
     "moldb_names": ["HMDB-v2.5"]
+  },
+  "image_storage": {
+    "bucket": "sm-image-storage-test"
   }
 }
