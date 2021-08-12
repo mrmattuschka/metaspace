@@ -17,6 +17,9 @@ import FilterPanel from '../../Filters/FilterPanel.vue'
 import config from '../../../lib/config'
 import { DatasetListItem, datasetListItemsQuery } from '../../../api/dataset'
 import MainImageHeader from '../../Annotations/annotation-widgets/default/MainImageHeader.vue'
+import CandidateMoleculesPopover from '../../Annotations/annotation-widgets/CandidateMoleculesPopover.vue'
+import MolecularFormula from '../../../components/MolecularFormula'
+import CopyButton from '../../../components/CopyButton.vue'
 
 interface GlobalImageSettings {
   resetViewPort: boolean
@@ -199,6 +202,58 @@ export default defineComponent<DatasetComparisonPageProps>({
       }
     }
 
+    const renderInfo = () => {
+      if (
+        !state.selectedAnnotation
+        || state.selectedAnnotation === -1
+        || !state.annotations[state.selectedAnnotation]) {
+        return <div class='ds-comparison-info'/>
+      }
+
+      const selectedAnnotation = state.annotations[state.selectedAnnotation].annotations[0]
+      let possibleCompounds : any = []
+      let isomers : any = []
+      let isobars : any = []
+
+      state.annotations[state.selectedAnnotation].annotations.forEach((annotation: any) => {
+        possibleCompounds = possibleCompounds.concat(annotation.possibleCompounds)
+        isomers = isomers.concat(annotation.isomers)
+        isobars = isobars.concat(annotation.isobars)
+      })
+
+      // @ts-ignore TS2604
+      const candidateMolecules = () => <CandidateMoleculesPopover
+        placement="bottom"
+        possibleCompounds={possibleCompounds}
+        isomers={isomers}
+        isobars={isobars}>
+        <MolecularFormula
+          class="sf-big text-2xl"
+          ion={selectedAnnotation.ion}
+        />
+      </CandidateMoleculesPopover>
+
+      return (
+        <div class='ds-comparison-info'>
+          {candidateMolecules()}
+          <CopyButton
+            class="ml-1"
+            text={selectedAnnotation.ion}>
+            Copy ion to clipboard
+          </CopyButton>
+          <span class="text-2xl flex items-baseline ml-4">
+            { selectedAnnotation.mz.toFixed(4) }
+            <span class="ml-1 text-gray-700 text-sm">m/z</span>
+            <CopyButton
+              class="self-start"
+              text={selectedAnnotation.mz.toFixed(4)}>
+              Copy m/z to clipboard
+            </CopyButton>
+          </span>
+        </div>
+      )
+    }
+
     const renderImageGallery = (nCols: number, nRows: number) => {
       return (
         <CollapseItem
@@ -248,11 +303,14 @@ export default defineComponent<DatasetComparisonPageProps>({
     }
 
     const renderCompounds = () => {
+      const annotations = state.selectedAnnotation >= 0 && state.annotations[state.selectedAnnotation]
+        ? state.annotations[state.selectedAnnotation].annotations : []
+
       // @ts-ignore TS2604
       const relatedMolecules = () => <RelatedMolecules
         query="isomers"
-        annotation={state.annotations[state.selectedAnnotation].annotations[0]}
-        annotations={state.annotations[state.selectedAnnotation].annotations}
+        annotation={annotations[0]}
+        annotations={annotations}
         databaseId={$store.getters.filter.database || 1}
         hideFdr
       />
@@ -317,6 +375,7 @@ export default defineComponent<DatasetComparisonPageProps>({
               onChange={(activeNames: string[]) => {
                 state.collapse = activeNames
               }}>
+              {renderInfo()}
               {renderImageGallery(nCols, nRows)}
               {renderCompounds()}
             </Collapse>

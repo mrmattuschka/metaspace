@@ -539,10 +539,19 @@ export const DatasetComparisonGrid = defineComponent<DatasetComparisonGridProps>
       const maxScale = userScaling[1] * (state.gridState[key].intensity?.max?.status === 'LOCKED'
         ? state.gridState[key].intensity.max.user / state.gridState[key].intensity.max.image : 1)
       const scale = [minScale, maxScale]
+      const rangeSliderScale = userScaling.slice(0)
+
+      // added in order to keep consistency even with ignore boundaries
+      if (rangeSliderScale[0] < 0) {
+        rangeSliderScale[0] = 0
+      }
+      if (rangeSliderScale[1] > 1) {
+        rangeSliderScale[1] = 1
+      }
 
       Vue.set(state.gridState, key, {
         ...state.gridState[key],
-        userScaling: userScaling,
+        userScaling: rangeSliderScale,
         imageScaledScaling: scale,
         intensity: {
           ...state.gridState[key].intensity,
@@ -727,10 +736,10 @@ export const DatasetComparisonGrid = defineComponent<DatasetComparisonGridProps>
             && state.annotationData[`${row}-${col}`].msmScore
             && <div class="dataset-comparison-extra dom-to-image-hidden">
               <div class="dataset-comparison-msm-badge">
-                <b>MSM</b> {formatMSM(state.annotationData[`${row}-${col}`].msmScore)}
+                MSM <b>{formatMSM(state.annotationData[`${row}-${col}`].msmScore)}</b>
               </div>
               <div class="dataset-comparison-fdr-badge">
-                <b>FDR</b> {formatFDR(state.annotationData[`${row}-${col}`].fdrLevel)}
+                FDR <b>{formatFDR(state.annotationData[`${row}-${col}`].fdrLevel)}</b>
               </div>
               <Popover
                 trigger="hover"
