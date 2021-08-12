@@ -198,12 +198,12 @@ export const DatasetComparisonGrid = defineComponent<DatasetComparisonGridProps>
     }
 
     const startImageSettings = async(key: string, annotation: any) => {
+      const hasPreviousSettings = state.gridState[key] && !state.gridState[key].empty
       const ionImagePng = await loadPngFromUrl(annotation.isotopeImages[0].url)
       const ionImageLayersAux = await ionImageLayers(annotation, key)
       const imageFitAux = await imageFit(annotation, key)
       const intensity = getIntensity(ionImageLayersAux[0]?.ionImage)
       const metadata = getMetadata(annotation)
-      const hasPreviousSettings = state.gridState[key] && !state.gridState[key].empty
 
       const settings = {
         intensity,
@@ -244,6 +244,16 @@ export const DatasetComparisonGrid = defineComponent<DatasetComparisonGridProps>
       Vue.set(state.gridState, key, settings)
       Vue.set(state.annotationData, key, annotation)
       await handleImageLayerUpdate(state.annotationData[key], key)
+
+      // persist ion intensity lock status
+      if (hasPreviousSettings && state.gridState[key].lockedIntensities !== undefined) {
+        if (state.gridState[key].lockedIntensities[0] !== undefined) {
+          handleIonIntensityLockChange(state.gridState[key].lockedIntensities[0], key, 'min')
+        }
+        if (state.gridState[key].lockedIntensities[1] !== undefined) {
+          handleIonIntensityLockChange(state.gridState[key].lockedIntensities[1], key, 'max')
+        }
+      }
     }
 
     const unsetAnnotation = (key: string) => {
