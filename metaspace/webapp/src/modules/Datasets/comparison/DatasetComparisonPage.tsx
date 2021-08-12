@@ -17,7 +17,6 @@ import FilterPanel from '../../Filters/FilterPanel.vue'
 import config from '../../../lib/config'
 import { DatasetListItem, datasetListItemsQuery } from '../../../api/dataset'
 import MainImageHeader from '../../Annotations/annotation-widgets/default/MainImageHeader.vue'
-import Vue from 'vue'
 
 interface GlobalImageSettings {
   resetViewPort: boolean

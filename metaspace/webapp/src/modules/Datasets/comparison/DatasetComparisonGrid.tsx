@@ -237,6 +237,8 @@ export const DatasetComparisonGrid = defineComponent<DatasetComparisonGridProps>
           ? state.gridState[key].scaleBarColor : '#000000',
         userScaling: hasPreviousSettings && state.gridState[key].userScaling !== undefined
           ? state.gridState[key].userScaling : [0, 1],
+        imageScaledScaling: hasPreviousSettings && state.gridState[key].imageScaledScaling !== undefined
+          ? state.gridState[key].imageScaledScaling : [0, 1],
       }
 
       Vue.set(state.gridState, key, settings)
@@ -417,7 +419,7 @@ export const DatasetComparisonGrid = defineComponent<DatasetComparisonGridProps>
       colormap: string = 'Viridis', opacityMode: any = 'linear') => {
       const finalImage = await ionImage(state.gridState[key]?.ionImagePng,
         annotation.isotopeImages[0],
-        state.gridState[key]?.scaleType, state.gridState[key]?.userScaling)
+        state.gridState[key]?.scaleType, state.gridState[key]?.imageScaledScaling)
       const hasOpticalImage = state.annotationData[key]?.dataset?.opticalImages[0]?.url
         !== undefined
 
@@ -517,7 +519,47 @@ export const DatasetComparisonGrid = defineComponent<DatasetComparisonGridProps>
     }
 
     const handleUserScalingChange = async(userScaling: any, key: string) => {
-      Vue.set(state.gridState, key, { ...state.gridState[key], userScaling: userScaling })
+      const minScale =
+        state.gridState[key].intensity?.min?.status === 'LOCKED'
+          ? userScaling[0] * (1
+          - (state.gridState[key].intensity.min.user / state.gridState[key].intensity.max.image))
+          + (state.gridState[key].intensity.min.user / state.gridState[key].intensity.max.image)
+          : userScaling[0]
+
+      const maxScale = userScaling[1] * (state.gridState[key].intensity?.max?.status === 'LOCKED'
+        ? state.gridState[key].intensity.max.user / state.gridState[key].intensity.max.image : 1)
+      const scale = [minScale, maxScale]
+
+      Vue.set(state.gridState, key, {
+        ...state.gridState[key],
+        userScaling: userScaling,
+        imageScaledScaling: scale,
+        intensity: {
+          ...state.gridState[key].intensity,
+          min:
+          {
+            ...state.gridState[key].intensity.min,
+            scaled:
+              state.gridState[key].intensity?.min?.status === 'LOCKED'
+              && state.gridState[key].intensity.max.image * userScaling[0]
+              < state.gridState[key].intensity.min.user
+                ? state.gridState[key].intensity.min.user
+                : state.gridState[key].intensity.max.image * userScaling[0],
+          },
+          max:
+          {
+            ...state.gridState[key].intensity.max,
+            scaled:
+
+              state.gridState[key].intensity?.max?.status === 'LOCKED'
+              && state.gridState[key].intensity.max.image * userScaling[1]
+              > state.gridState[key].intensity.max.user
+                ? state.gridState[key].intensity.max.user
+                : state.gridState[key].intensity.max.image * userScaling[1],
+          },
+        },
+      })
+
       await handleImageLayerUpdate(state.annotationData[key], key)
     }
 
@@ -533,11 +575,22 @@ export const DatasetComparisonGrid = defineComponent<DatasetComparisonGridProps>
     }
 
     const handleIonIntensityChange = async(intensity: number, key: string, type: string) => {
+      let minScale = state.gridState[key].userScaling[0]
+      let maxScale = state.gridState[key].userScaling[1]
+
       if (type === 'min') {
-        Vue.set(state.gridState, key, { ...state.gridState[key], minIntensity: intensity })
+        minScale = intensity / state.gridState[key].intensity.max.image
+        minScale = minScale > 1 ? 1 : minScale
+        minScale = minScale > maxScale ? maxScale : minScale
+        minScale = minScale < 0 ? 0 : minScale
       } else {
-        Vue.set(state.gridState, key, { ...state.gridState[key], maxIntensity: intensity })
+        maxScale = intensity / state.gridState[key].intensity.max.image
+        maxScale = maxScale > 1 ? 1 : maxScale
+        maxScale = maxScale < 0 ? 0 : maxScale
+        maxScale = maxScale < minScale ? minScale : maxScale
       }
+
+      handleUserScalingChange([minScale, maxScale], key)
     }
 
     const handleIonIntensityLockChange = async(value: number, key: string, type: string) => {
@@ -547,7 +600,40 @@ export const DatasetComparisonGrid = defineComponent<DatasetComparisonGridProps>
       const intensity = getIntensity(state.gridState[`${key}`]?.ionImageLayers[0]?.ionImage,
         lockedIntensities)
 
-      Vue.set(state.gridState, key, { ...state.gridState[key], lockedIntensities, intensity })
+      if (intensity && intensity.max && maxLocked && intensity.max.status === 'LOCKED') {
+        intensity.max.scaled = maxLocked
+        intensity.max.user = maxLocked
+        intensity.max.clipped = maxLocked
+      }
+
+      if (intensity && intensity.min && minLocked && intensity.min.status === 'LOCKED') {
+        intensity.min.scaled = minLocked
+        intensity.min.user = minLocked
+        intensity.min.clipped = minLocked
+      }
+
+      if (intensity && intensity.min && intensity.min.status !== 'LOCKED'
+      ) {
+        Vue.set(state.gridState, key, {
+          ...state.gridState[key],
+          imageScaledScaling: [0, state.gridState[`${key}`].imageScaledScaling[1]],
+        })
+      }
+      if (intensity && intensity.max && intensity.max.status !== 'LOCKED') {
+        Vue.set(state.gridState, key, {
+          ...state.gridState[key],
+          imageScaledScaling: [state.gridState[`${key}`].imageScaledScaling[0], 1],
+        })
+      }
+
+      Vue.set(state.gridState, key, {
+        ...state.gridState[key],
+        lockedIntensities: lockedIntensities,
+        intensity: intensity,
+        userScaling: [0, 1],
+      })
+
+      await handleImageLayerUpdate(state.annotationData[key], key)
     }
 
     const handleGlobalScaleBarColorChange = () => {
