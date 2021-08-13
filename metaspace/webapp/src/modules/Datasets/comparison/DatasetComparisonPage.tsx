@@ -106,10 +106,15 @@ export default defineComponent<DatasetComparisonPageProps>({
     const { viewId: snapshotId } = $route.query
     const {
       result: settingsResult,
-      loading: settingsLoading,
+      onResult: onSnapshotResult,
     } = useQuery<any>(fetchImageViewerSnapshot, {
       id: snapshotId,
       datasetId: sourceDsId,
+    })
+
+    onSnapshotResult(async(result) => {
+      // enable datasets name query, now that the ids where gotten
+      dsQueryOptions.enabled = true
     })
 
     const gridSettings = computed(() => settingsResult.value != null
@@ -131,21 +136,32 @@ export default defineComponent<DatasetComparisonPageProps>({
     }
 
     const queryOptions = reactive({ enabled: false, fetchPolicy: 'no-cache' as const })
+    const dsQueryOptions = reactive({ enabled: false, fetchPolicy: 'no-cache' as const })
     const queryVars = computed(() => ({
       ...queryVariables(),
       dFilter: { ...queryVariables().dFilter, ids: Object.values(state.grid || {}).join('|') },
     }))
-    const annotationsQuery = useQuery<any>(comparisonAnnotationListQuery, queryVars, queryOptions)
+    const {
+      result: annotationsResult,
+      loading: annotationsLoading,
+    } = useQuery<any>(comparisonAnnotationListQuery, queryVars, queryOptions)
     const datasetsQuery = useQuery<{allDatasets: DatasetListItem[]}>(datasetListItemsQuery,
-      queryVars, queryOptions)
+      {
+        dFilter: {
+          ...queryVariables().dFilter,
+          ids:
+          gridSettings.value ? Object.values((safeJsonParse(gridSettings.value.snapshot) || {}).grid || {})
+            .join('|') : '',
+        },
+      }, dsQueryOptions)
     const loadAnnotations = () => { queryOptions.enabled = true }
     state.annotations = computed(() => {
-      if (annotationsQuery.result.value) {
-        return annotationsQuery.result.value.allAggregatedAnnotations
+      if (annotationsResult.value) {
+        return annotationsResult.value.allAggregatedAnnotations
       }
       return null
     })
-    state.datasets = computed(() => {
+    const datasets = computed(() => {
       if (datasetsQuery.result.value) {
         return datasetsQuery.result.value.allDatasets
       }
@@ -293,9 +309,9 @@ export default defineComponent<DatasetComparisonPageProps>({
                 colormap={state.globalImageSettings.colormap}
                 settings={gridSettings}
                 annotations={state.annotations || []}
-                datasets={state.datasets || []}
+                datasets={datasets.value || []}
                 selectedAnnotation={state.selectedAnnotation}
-                isLoading={state.isLoading || annotationsQuery.loading.value}
+                isLoading={state.isLoading || annotationsLoading.value}
               />
             }
           </div>
@@ -323,7 +339,14 @@ export default defineComponent<DatasetComparisonPageProps>({
         {
           !state.isLoading
           && state.collapse.includes('compounds')
+          && (Array.isArray(annotations) && annotations.length > 0)
           && relatedMolecules()
+        }
+        {
+          !state.isLoading
+          && state.collapse.includes('compounds')
+          && (!Array.isArray(annotations) || annotations.length < 1)
+          && <div class='flex w-full items-center justify-center'>No data</div>
         }
       </CollapseItem>)
     }
@@ -359,7 +382,7 @@ export default defineComponent<DatasetComparisonPageProps>({
               />
             }
             {
-              (annotationsQuery.loading.value)
+              (annotationsLoading.value)
               && <div class='w-full absolute text-center top-0'>
                 <i
                   class="el-icon-loading"

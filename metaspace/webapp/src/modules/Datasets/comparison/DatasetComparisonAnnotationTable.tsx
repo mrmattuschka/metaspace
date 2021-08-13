@@ -1,4 +1,4 @@
-import { computed, defineComponent, onMounted, onUnmounted, reactive, ref, watchEffect } from '@vue/composition-api'
+import { computed, defineComponent, onMounted, onUnmounted, reactive, ref } from '@vue/composition-api'
 import './DatasetComparisonAnnotationTable.scss'
 import { Table, TableColumn, Pagination, Button, Popover } from '../../../lib/element-ui'
 import ProgressButton from '../../Annotations/ProgressButton.vue'
