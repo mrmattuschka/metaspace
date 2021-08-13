@@ -220,7 +220,7 @@ export default defineComponent<DatasetComparisonPageProps>({
 
     const renderInfo = () => {
       if (
-        !state.selectedAnnotation
+        state.selectedAnnotation === undefined
         || state.selectedAnnotation === -1
         || !state.annotations[state.selectedAnnotation]) {
         return <div class='ds-comparison-info'/>
