@@ -1,9 +1,7 @@
-import argparse
 import json
 from pathlib import Path
 
 import requests
-from metaspace import SMInstance
 
 envs = {
     'beta': 'https://beta.metaspace2020.eu',
@@ -11,11 +9,16 @@ envs = {
     'prod': 'https://metaspace2020.eu',
 }
 
-
 def get_dataset_ids_from_csv_file(filename):
     with open(filename, 'r') as f:
         datasets = [d.strip('\n') for d in f.readlines()]
     return datasets
+
+
+def check_db_ids(sm, ids):
+    database_ids = [str(db.id) for db in sm.databases()]
+    nonexistence = [_id for _id in ids if _id not in database_ids]
+    return nonexistence
 
 
 def download_file(url, file_path):
@@ -55,33 +58,22 @@ def download_dataset(sm, dataset_id, p):
         print(filename)
         download_file(url, p / dataset_id / filename)
 
+def submit_dataset(sm, dataset_id, database_ids, p):
+    is_public = False
+    with open(p / dataset_id / 'metadata.json', 'r') as f:
+        metadata = json.loads(f.read())
 
-def main():
-    help_msg = 'Download datasets files and metadata.'
-    parser = argparse.ArgumentParser(description=help_msg)
-    parser.add_argument(
-        '--datasets_file',
-        type=str,
-        required=True,
-        help='Path to file that contains dataset_ids in CSV format',
+    directory = p / dataset_id
+    names = set(
+        x.stem for x in Path(directory).iterdir() if x.is_file() and x.suffix in ('.ibd', '.imzML')
     )
-    parser.add_argument(
-        '--env',
-        type=str,
-        choices=urls.keys(),
-        required=True,
-        help='Name of environmetn: beta, staging, prod',
-    )
-    parser.add_argument('--api_key', type=str, required=True, help='API KEY')
-    args = parser.parse_args()
-
-    dataset_ids = get_dataset_ids_from_csv_file(args.datasets_file)
-
-    p = Path('.')
-    sm = SMInstance(host=envs[args.env], api_key=args.api_key)
-    for dataset_id in dataset_ids:
-        download_dataset(sm, dataset_id, p)
-
-
-if __name__ == '__main__':
-    main()
+    for name in list(names):
+        dataset_id = sm.submit_dataset(
+            directory / Path(f'{name}.imzML'),
+            directory / Path(f'{name}.ibd'),
+            name,
+            json.dumps(metadata),
+            is_public,
+            database_ids,
+        )
+        print(f'Submited dataset: {dataset_id}')

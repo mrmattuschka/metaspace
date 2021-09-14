@@ -1,31 +1,13 @@
 import argparse
-import json
 from pathlib import Path
 
-import requests
 from metaspace import SMInstance
 
-envs = {
-    'beta': 'https://beta.metaspace2020.eu',
-    'staging': 'https://staging.metaspace2020.eu',
-    'prod': 'https://metaspace2020.eu',
-}
-
-
-def get_dataset_ids_from_csv_file(filename):
-    with open(filename, 'r') as f:
-        datasets = [d.strip('\n') for d in f.readlines()]
-    return datasets
-
-
-def check_db_ids(sm, ids):
-    database_ids = [str(db.id) for db in sm.databases()]
-    nonexistence = [_id for _id in ids if _id not in database_ids]
-    return nonexistence
+from util import get_dataset_ids_from_csv_file, check_db_ids, envs, submit_dataset
 
 
 def main():
-    help_msg = 'Update the datasets databases.\n'
+    help_msg = 'Submit datasets.'
     parser = argparse.ArgumentParser(description=help_msg)
     parser.add_argument(
         '--datasets_file',
@@ -55,8 +37,7 @@ def main():
         raise Exception(msg)
 
     for dataset_id in dataset_ids:
-        ds = sm.dataset(id=dataset_id)
-        sm.update_dataset_dbs(dataset_id, args.database_ids, ds.adducts)
+        submit_dataset(sm, dataset_id, args.database_ids, p)
 
 
 if __name__ == '__main__':
