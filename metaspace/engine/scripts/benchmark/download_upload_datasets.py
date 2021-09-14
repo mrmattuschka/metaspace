@@ -3,7 +3,14 @@ from pathlib import Path
 
 from metaspace import SMInstance
 
-from util import download_dataset, download_file, get_dataset_ids_from_csv_file, envs, submit_dataset
+from util import (
+    download_dataset,
+    download_file,
+    get_dataset_ids_from_csv_file,
+    envs,
+    submit_dataset,
+)
+
 
 def main():
     help_msg = 'Download datasets from one env and submit to another.'
@@ -28,8 +35,18 @@ def main():
         required=True,
         help='The name of the environment to which the dataset files will be submitted.',
     )
-    parser.add_argument('--api_key_from', type=str, required=True, help='API KEY of the environment from which the files will be downloaded.')
-    parser.add_argument('--api_key_to', type=str, required=True, help='API KEY of the environment to which the files will be submitted.')
+    parser.add_argument(
+        '--api_key_from',
+        type=str,
+        required=True,
+        help='API KEY of the environment from which the files will be downloaded.',
+    )
+    parser.add_argument(
+        '--api_key_to',
+        type=str,
+        required=True,
+        help='API KEY of the environment to which the files will be submitted.',
+    )
     parser.add_argument('--database_ids', nargs='+', required=True, help='List of database ID.')
     args = parser.parse_args()
 

@@ -6,6 +6,7 @@ from metaspace import SMInstance
 
 from util import get_dataset_ids_from_csv_file, check_db_ids, envs
 
+
 def main():
     help_msg = 'Update the datasets databases.\n'
     parser = argparse.ArgumentParser(description=help_msg)

@@ -9,6 +9,7 @@ envs = {
     'prod': 'https://metaspace2020.eu',
 }
 
+
 def get_dataset_ids_from_csv_file(filename):
     with open(filename, 'r') as f:
         datasets = [d.strip('\n') for d in f.readlines()]
@@ -57,6 +58,7 @@ def download_dataset(sm, dataset_id, p):
             filename = filename[:-2] + filename[-2:].upper()
         print(filename)
         download_file(url, p / dataset_id / filename)
+
 
 def submit_dataset(sm, dataset_id, database_ids, p):
     is_public = False
