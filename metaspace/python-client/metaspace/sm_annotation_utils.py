@@ -1221,6 +1221,7 @@ class SMDataset(object):
         only_first_isotope: bool = False,
         scale_intensity: Union[bool, _TIC_Literal, np.ndarray] = True,
         hotspot_clipping: bool = False,
+        disable_progressbar: bool = True,
         **annotation_filter,
     ) -> List[IsotopeImages]:
         """Retrieve all ion images for the dataset and given annotation filters.
@@ -1270,8 +1271,9 @@ class SMDataset(object):
                 tqdm(
                     pool.map(
                         get_annotation_images,
-                        annotations,
+                        annotations
                     ),
+                    disable=disable_progressbar,
                     total=len(annotations),
                     bar_format='{l_bar}{bar:40}{r_bar}{bar:-10b}',
                 )
