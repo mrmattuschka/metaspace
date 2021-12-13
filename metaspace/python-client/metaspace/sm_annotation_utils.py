@@ -1271,9 +1271,9 @@ class SMDataset(object):
                 tqdm(
                     pool.map(
                         get_annotation_images,
-                        annotations,
-                        disable=disable_progressbar
+                        annotations
                     ),
+                    disable=disable_progressbar,
                     total=len(annotations),
                     bar_format='{l_bar}{bar:40}{r_bar}{bar:-10b}',
                 )
